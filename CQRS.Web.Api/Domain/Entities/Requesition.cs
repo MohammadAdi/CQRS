@@ -10,6 +10,6 @@ namespace CQRS.Web.Api.Domain.Entities
         public DateTime DocumentDate { get; set; }
         [Required]
         public Status Status { get; set; }
-        public ICollection<RequestionDetail> Details { get; set; }
+        public virtual ICollection<RequestionDetail> Details { get; set; }
     }
 }

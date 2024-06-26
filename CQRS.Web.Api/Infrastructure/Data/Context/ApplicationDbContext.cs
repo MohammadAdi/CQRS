@@ -25,7 +25,6 @@ namespace CQRS.Web.Api.Infrastructure.Data.Context
         private IDbContextTransaction _currentTransaction;
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-            ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,7 +45,6 @@ namespace CQRS.Web.Api.Infrastructure.Data.Context
                 }
             );
 
-            modelBuilder.Entity<Requestion>().HasMany(x => x.Details);
         }
 
         public DbSet<User> Users { get; set; }

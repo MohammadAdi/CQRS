@@ -47,7 +47,7 @@ namespace CQRS.Web.Api.Features.User.Commands
             {
                 try
                 {
-                    var existingUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id);
+                    var existingUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == request.Id);
                     if (existingUser is null)
                         return new ApiResponse("User Not Found", statusCode: 404);
 

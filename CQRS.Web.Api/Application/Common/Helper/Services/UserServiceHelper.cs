@@ -19,7 +19,7 @@ namespace CQRS.Web.Api.Application.Common.Helper.Services
         {
             try
             {
-                var currentUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+                var currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
                 if (currentUser == null)
                     throw new ApiException("User not found!");
 

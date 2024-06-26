@@ -8,11 +8,11 @@ namespace CQRS.Web.Api.Domain.Entities
         public Guid Id { get; set; }
         [ForeignKey("RequestionId")]
         [Required]
-        public Requestion Requestion { get; set; }
+        public virtual Requestion Requestion { get; set; }
         public Guid RequestionId { get; set; }
         [ForeignKey("ProductId")]
         [Required]
-        public Product Product { get; set; }
+        public virtual Product Product { get; set; }
         public long ProductId { get; set; }
         [Required]
         public int QtyOrder { get; set; }

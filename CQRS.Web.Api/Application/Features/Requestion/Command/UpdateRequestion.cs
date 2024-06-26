@@ -42,7 +42,7 @@ namespace CQRS.Web.Api.Application.Features.Requestion.Command
                 {
                     var currentUser = await _userServices.CheckCurrentUser(request.UserId, cancellationToken);
 
-                    var existingRequestion = await _context.Requestions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+                    var existingRequestion = await _context.Requestions.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
                     if (existingRequestion == null)
                         return new ApiResponse("Requestion Not Found", statusCode: 404);
 

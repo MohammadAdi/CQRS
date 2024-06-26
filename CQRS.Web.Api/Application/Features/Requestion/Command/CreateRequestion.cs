@@ -1,7 +1,5 @@
 ﻿using AutoWrapper.Wrappers;
 using CQRS.Web.Api.Application.Common.Interface;
-using CQRS.Web.Api.Application.Features.Requestion.Model;
-using CQRS.Web.Api.Domain.Entities;
 using CQRS.Web.Api.Infrastructure.Data.Context;
 using FluentValidation;
 using MediatR;
@@ -14,7 +12,6 @@ namespace CQRS.Web.Api.Application.Features.Requestion.Command
         public class Command : IRequest<ApiResponse>
         {
             public DateTime DocumentDate { get; set; }
-            public List<CreateRequestionDetailModel> Details { get; set; }
             public long UserId { get; set; }
         }
 
@@ -40,54 +37,38 @@ namespace CQRS.Web.Api.Application.Features.Requestion.Command
             {
                 try
                 {
-                    using (var transaction = _context.Database.BeginTransaction())
+                    var currentUser = await _userServices.CheckCurrentUser(request.UserId, cancellationToken);
+
+                    var newID = Guid.NewGuid();
+                    var header = new Domain.Entities.Requestion
                     {
-                        try
-                        {
-                            var currentUser = await _userServices.CheckCurrentUser(request.UserId, cancellationToken);
+                        DocumentDate = request.DocumentDate.Date,
+                        CreatedBy = currentUser.Id,
+                        IsDeleted = false,
+                        Status = Domain.Enums.Status.Draft
+                    };
+                    _context.Requestions.Add(header);
 
-                            var newID = Guid.NewGuid();
-                            var header = new Domain.Entities.Requestion
-                            {
-                                DocumentDate = request.DocumentDate,
-                                CreatedBy = currentUser.Id,
-                                IsDeleted = false,
-                                Status = Domain.Enums.Status.Open
-                            };
-                            _context.Requestions.Add(header);
+                    //if (!request.Details.Any())
+                    //    throw new ApiException("Requestion Detail cannot be empty");
 
-                            if (!request.Details.Any())
-                                throw new ApiException("Requestion Detail cannot be empty");
+                    //var lists = new List<RequestionDetail>();
+                    //foreach (var item in request.Details)
+                    //{
+                    //    var d = new RequestionDetail()
+                    //    {
+                    //        Id = Guid.NewGuid(),
+                    //        RequestionId = newID,
+                    //        ProductId = item.ProductId,
+                    //        QtyOrder = item.QtyOrder,
+                    //        IsDeleted = false,
+                    //        CreatedBy = currentUser.Id
+                    //    };
+                    //    lists.Add(d);
+                    //}
+                    //_context.RequestionDetails.AddRange(lists);
+                    await _context.SaveChangesAsync(cancellationToken);
 
-                            var lists = new List<RequestionDetail>();
-                            foreach (var item in request.Details)
-                            {
-                                var d = new RequestionDetail()
-                                {
-                                    Id = Guid.NewGuid(),
-                                    RequestionId = newID,
-                                    ProductId = item.ProductId,
-                                    QtyOrder = item.QtyOrder,
-                                    IsDeleted = false,
-                                    CreatedBy = currentUser.Id
-                                };
-                                lists.Add(d);
-                            }
-                            _context.RequestionDetails.AddRange(lists);
-                            await _context.SaveChangesAsync(cancellationToken);
-
-                            transaction.Commit();
-                        }
-                        catch (TransactionException ext)
-                        {
-                            transaction.Rollback();
-                            throw new ApiException(ext.Message);
-                        }
-                        finally
-                        {
-                            transaction.Dispose();
-                        }
-                    }
                     return new ApiResponse("Requestion has been created");
                 }
                 catch (Exception ex)

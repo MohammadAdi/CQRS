@@ -1,15 +1,15 @@
 ﻿using AutoWrapper.Wrappers;
 using CQRS.Web.Api.Application.Common.Interface;
 using CQRS.Web.Api.Application.Features.Product.Model;
-using CQRS.Web.Api.Domain.Entities;
+using CQRS.Web.Api.Application.Features.Requestion.Model;
 using CQRS.Web.Api.Infrastructure.Data.Context;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace CQRS.Web.Api.Application.Features.Product.Query
+namespace CQRS.Web.Api.Application.Features.Requestion.Query
 {
-    public class GetListProduct
+    public class GetListRequestion
     {
         public class Query : IRequest<ApiResponse>
         {
@@ -41,8 +41,8 @@ namespace CQRS.Web.Api.Application.Features.Product.Query
                 {
                     var currentUser = await _userServices.CheckCurrentUser(request.UserId, cancellationToken);
 
-                    var listProduct = await _context.Products.Where(x => string.IsNullOrEmpty(request.KeyWord) || (x.ProductCode.Contains(request.KeyWord) || x.ProductName.Contains(request.KeyWord))).ToListAsync(cancellationToken);
-                     
+                    var listProduct = await _context.Requestions.ToListAsync(cancellationToken);
+
 
                     if (!request.PageSize.HasValue && !request.PageNumber.HasValue)
                         return new ApiResponse("Fetch data succeeded", listProduct);
@@ -56,13 +56,23 @@ namespace CQRS.Web.Api.Application.Features.Product.Query
                     var skip = (request.PageNumber.Value - 1) * request.PageSize.Value;
 
                     listProduct = listProduct.Skip(skip).Take(request.PageSize.Value).ToList();
-                    var result = new GetListProductResponseModel()
+
+                    var data = listProduct.Select(x => new GetRequestionModel()
+                    {
+                        Id = x.Id.ToString(),
+                        DocumentDate = x.DocumentDate.ToString("yyyy-MM-dd"),
+                        LastStatus = x.Status.ToString(),
+                        LastModifiedDate = x.UpdatedAt.HasValue ? x.UpdatedAt.Value.ToString("yyyy-MM-dd") : x.CreatedAt.ToString("yyyy-MM-dd"),
+                        LastModidiedBy = x.UpdatedAt.HasValue ? x.Updater.Name : x.Creator.Name,
+                    }).ToList();
+
+                    var result = new GetListRequestionResponseModel()
                     {
                         TotalData = totalRecords,
                         TotalPage = totalPages,
                         PageNumber = request.PageNumber.Value,
                         PageSize = request.PageSize.Value,
-                        Data = listProduct
+                        Data = data
                     };
                     return new ApiResponse("Fetch data succeeded", result);
                 }

@@ -14,7 +14,6 @@ namespace CQRS.Web.Api.Application.Features.Product.Query
         public class Query : IRequest<ApiResponse>
         {
             public int ProductId { get; set; }
-            public long UserId { get; set; }
         }
         public class QueryValidator : AbstractValidator<Query>
         {
@@ -37,9 +36,7 @@ namespace CQRS.Web.Api.Application.Features.Product.Query
             {
                 try
                 {
-                    var currentUser = await _userServices.CheckCurrentUser(request.UserId, cancellationToken);
-
-                    var product = await _context.Products.AsNoTracking().FirstOrDefaultAsync(x => x.ProductId == request.ProductId, cancellationToken);
+                    var product = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == request.ProductId, cancellationToken);
                     if (product == null)
                         return new ApiResponse("ProductId is not found", (int)HttpStatusCode.NotFound);
 

@@ -2,8 +2,9 @@
 {
     public enum Status
     {
-        Open = 0,
-        Closed = 1,
-        Cancel = 2
+        Draft = 0,
+        Open = 1,
+        Closed = 2,
+        Cancel = 3
     }
 }
